@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Prediction System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏡 House Price Prediction System</h1>
+            <p>Predict house prices using Machine Learning</p>
+        </header>
+
+        <div class="content">
+            <form id="predictionForm">
+                <div class="form-group">
+                    <label for="overall_qual">Overall Quality (1-10):</label>
+                    <input type="number" id="overall_qual" name="overall_qual" min="1" max="10" required>
+                    <small>Rate the overall material and finish of the house</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="gr_liv_area">Above Ground Living Area (sq ft):</label>
+                    <input type="number" id="gr_liv_area" name="gr_liv_area" min="0" step="1" required>
+                    <small>Total square footage of living area above ground</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="total_bsmt_sf">Total Basement Area (sq ft):</label>
+                    <input type="number" id="total_bsmt_sf" name="total_bsmt_sf" min="0" step="1" required>
+                    <small>Total square footage of basement area</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="garage_cars">Garage Size (number of cars):</label>
+                    <input type="number" id="garage_cars" name="garage_cars" min="0" max="5" required>
+                    <small>Garage capacity in car sizes</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="year_built">Year Built:</label>
+                    <input type="number" id="year_built" name="year_built" min="1800" max="2026" required>
+                    <small>Original construction year</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="neighborhood">Neighborhood:</label>
+                    <select id="neighborhood" name="neighborhood" required>
+                        <option value="">Select a neighborhood</option>
+                        {% for neighborhood in neighborhoods %}
+                        <option value="{{ neighborhood }}">{{ neighborhood }}</option>
+                        {% endfor %}
+                    </select>
+                    <small>Physical location within Ames city limits</small>
+                </div>
+
+                <button type="submit" class="btn-predict">Predict Price</button>
+            </form>
+
+            <div id="result" class="result hidden">
+                <h2>Predicted House Price</h2>
+                <div class="price" id="predictedPrice"></div>
+                <button onclick="resetForm()" class="btn-reset">Make Another Prediction</button>
+            </div>
+
+            <div id="error" class="error hidden"></div>
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Calculating prediction...</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Powered by Random Forest Regressor | Machine Learning Project</p>
+        </footer>
+    </div>
+
+    <script>
+        const form = document.getElementById('predictionForm');
+        const resultDiv = document.getElementById('result');
+        const errorDiv = document.getElementById('error');
+        const loadingDiv = document.getElementById('loading');
+        const priceDiv = document.getElementById('predictedPrice');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Hide previous results and errors
+            resultDiv.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            loadingDiv.classList.remove('hidden');
+
+            // Get form data
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                loadingDiv.classList.add('hidden');
+
+                if (data.success) {
+                    priceDiv.textContent = data.predicted_price;
+                    resultDiv.classList.remove('hidden');
+                    form.classList.add('hidden');
+                } else {
+                    showError(data.error || 'An error occurred during prediction');
+                }
+            } catch (error) {
+                loadingDiv.classList.add('hidden');
+                showError('Network error: Unable to connect to the server');
+            }
+        });
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function resetForm() {
+            form.reset();
+            form.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
