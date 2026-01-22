@@ -1,0 +1,8 @@
+
+
+Name: Segla Pentho
+Matric Number: 22CG031952
+Machine Learning Algorithm Used: Random Forest Regressor
+Model Persistence Method Used: Joblib
+Live URL of Hosted Application: https://houseprice-project-segla-pentho.onrender.com
+GitHub Repository Link: https://github.com/sxsii/HousePrice_project_Segla_Pentho_22CG031952
